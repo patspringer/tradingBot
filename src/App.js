@@ -23,6 +23,10 @@ app.get('/validateToken', (req, res) => {
     validateToken(res)
 });
 
+app.get('/placeOrder', (req, res) => {
+    placeOrder(res)
+});
+
 
 /**
  * Reset the TDA access token
@@ -82,6 +86,46 @@ function resetAccessToken(res) {
 
             // to check it's correct, display it
             res.send(authReply.AAPL.lastPrice.toString());
+        }
+    });
+}
+
+/**
+ * Place an order to Account
+ */
+function placeOrder(res) {
+    var place_Order_req = {
+        url: 'https://api.tdameritrade.com/v1/accounts/493357694/orders',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization' : 'Bearer ' + details.access_token
+        },
+        form: {
+            "orderType": "MARKET",
+  	    "session": "NORMAL",
+            "duration": "DAY",
+            "orderStrategyType": "SINGLE",
+            "orderLegCollection": [
+            	{
+                  "instruction": "Buy",
+                  "quantity": 1,
+                  "instrument": {
+                    "symbol": "AAPL",
+                    "assetType": "EQUITY"
+                  }
+                }
+            ] 
+        }
+    };
+
+    request(place_Order_req, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            // get the TDA response
+            var authReply = JSON.parse(body);
+
+            // to check it's correct, display it
+            res.send(authReply);
         }
     });
 }
